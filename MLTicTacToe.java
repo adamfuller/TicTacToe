@@ -17,7 +17,7 @@ public class MLTicTacToe {
         ArrayList<Player> winners = new ArrayList<>();
         ArrayList<Player> nextGen = new ArrayList<>();
         int generationNum = 0;
-        int carryOver = 12; // number of players that carry over
+        int carryOver = 9; // number of players that carry over
         int numBoards = (int) ((carryOver - 1) * (carryOver / 2.0)); // allow for carryOver to evenly produce new gen
         int numPlayers = numBoards * 2; // double the number of boards
 
@@ -26,7 +26,7 @@ public class MLTicTacToe {
             players.add(new Player());
         }
 
-        for (int n__ = 0; n__ < 500; n__++){ // generation loop
+        for (int n__ = 0; n__ < 200; n__++){ // generation loop
 
             // boards = new ArrayList<>(); // clear the boards (all should be full and more will be made)
             winners = new ArrayList<>(); // clear winners (should be in players)

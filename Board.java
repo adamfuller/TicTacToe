@@ -20,15 +20,15 @@ public class Board {
 
         this.turn = Math.random() > 0.5 ? 1 : 0;
         if (player1.isUser() && this.turn == 0){
-            System.out.println("Player 1 is x");
+            System.out.println("Player 1 is x, User moves first");
         } else if (player1.isUser() && this.turn == 1){
-            System.out.println("Player 1 is o");
+            System.out.println("Player 1 is x, Computer moves first");
         }
 
         if (player2.isUser() && this.turn == 0){
-            System.out.println("Player 2 is x");
+            System.out.println("Player 2 is o, User moves first");
         } else if (player2.isUser() && this.turn == 1){
-            System.out.println("Player 2 is o");
+            System.out.println("Player 2 is o, User moves first");
         }
     }
 

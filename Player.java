@@ -5,7 +5,7 @@ public class Player implements Saveable, Loadable{
     private static int playerNum = 0;
     public static Scanner scanner;
     private double weights[][] = new double[10][9]; // 10th is for empty board
-    // private double friendlyWeights[][] = new double[9][9];  // weighting for spots taken by friendly piece
+    private double friendlyWeights[][] = new double[10][9];  // weighting for spots taken by friendly piece
     private int winCount = 0;
     private int score = 0;
     private int id;
@@ -22,7 +22,7 @@ public class Player implements Saveable, Loadable{
         for (int i = 0; i < 10; i++){
             for (int j = 0; j<9; j++){
                 this.weights[i][j] = 1.0 - Math.random(); // get a random number greater than 0 up to and including 1
-                // this.friendlyWeights[i][j] = 1.0 - Math.random();
+                this.friendlyWeights[i][j] = 1.0 - Math.random();
             }
         }
     }
@@ -39,12 +39,13 @@ public class Player implements Saveable, Loadable{
         this.isUser = isUser;
     }
 
-    public Player(double weights[][]){
+    public Player(double weights[][], double friendlyWeights[][]){
         if (Player.scanner == null){
             Player.scanner = new Scanner(System.in);
         }
         this.id = Player.playerNum++;
         this.weights = weights;
+        this.friendlyWeights = friendlyWeights;
     }
 
     public String toString(){
@@ -55,6 +56,7 @@ public class Player implements Saveable, Loadable{
     /**
      * Apply weighting to a board and pick a spot
      * @param spots - spots on the board
+     * @param playerNum - this players piece number
      * @return
      */
     public int pick(int spots[], int playerNum){
@@ -85,7 +87,11 @@ public class Player implements Saveable, Loadable{
                 if (weighting[i] < -0.001){ // spot is taken
 
                 } else {
-                    weighting[i] += this.weights[index][i];
+                    if (spots[index] == playerNum){ // fiendly spot taken
+                        weighting[i] += this.friendlyWeights[index][i];
+                    } else { // non-friendly spot taken
+                        weighting[i] += this.weights[index][i];
+                    }
                 }
             }
         });
@@ -154,15 +160,17 @@ public class Player implements Saveable, Loadable{
     public Player breed(Player otherPlayer){
         Player offspring;
         double newWeights[][] = new double[10][9];
+        double newFriendlyWeights[][] = new double[10][9];
 
         for (int i = 0; i<this.weights.length; i++){
             for (int j = 0; j<this.weights[0].length; j++){
                 double geneMixRatio = Math.random();
                 newWeights[i][j] = this.weights[i][j]*geneMixRatio + otherPlayer.weights[i][j]*(1-geneMixRatio);
+                newFriendlyWeights[i][j] = this.friendlyWeights[i][j]*geneMixRatio + otherPlayer.friendlyWeights[i][j]*(1-geneMixRatio);
             }
         }
 
-        offspring = new Player(newWeights);
+        offspring = new Player(newWeights, newFriendlyWeights);
         return offspring;
     }
 
