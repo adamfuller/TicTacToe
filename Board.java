@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 
 public class Board {
-    public static final int boardSize = 4; // width&height of the board
+    public static final int boardSize = 3; // width&height of the board
     private Player players[] = { null, null };
     private int turn;
     private int spots[] = new int[Board.boardSize*Board.boardSize]; // -1 means open 0 is p1, 1 is p2

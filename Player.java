@@ -192,23 +192,33 @@ public class Player implements Saveable, Loadable{
         double newFriendlyWeights[][] = new double[this.friendlyWeights.length][this.friendlyWeights[0].length];
         
         if (this.score < otherPlayer.getScore()){
-            double geneMixRatio = this.score/otherPlayer.getScore(); // ratio of this players wins to others
+            // double geneMixRatio = this.score/otherPlayer.getScore(); // ratio of this players wins to others
     
             for (int i = 0; i<this.weights.length; i++){
                 for (int j = 0; j<this.weights[0].length; j++){
-                    newWeights[i][j] = this.weights[i][j]*geneMixRatio + otherPlayer.weights[i][j]*(1-geneMixRatio);
-                    newFriendlyWeights[i][j] = this.friendlyWeights[i][j]*geneMixRatio + otherPlayer.friendlyWeights[i][j]*(1-geneMixRatio);
+                    if (Math.random() > 0.75){ // less likely to pick own
+                        newWeights[i][j] = this.weights[i][j];
+                        newFriendlyWeights[i][j] = this.friendlyWeights[i][j];
+                    } else {
+                        newWeights[i][j] = otherPlayer.weights[i][j];
+                        newFriendlyWeights[i][j] = otherPlayer.friendlyWeights[i][j];
+                    }
                 }
             }
     
             offspring = new Player(newWeights, newFriendlyWeights);
         } else {
-            double geneMixRatio = otherPlayer.getScore()/this.score; // ratio of this players wins to others
+            // double geneMixRatio = otherPlayer.getScore()/this.score; // ratio of this players wins to others
     
             for (int i = 0; i<this.weights.length; i++){
                 for (int j = 0; j<this.weights[0].length; j++){
-                    newWeights[i][j] = this.weights[i][j]*(1-geneMixRatio) + otherPlayer.weights[i][j]*geneMixRatio;
-                    newFriendlyWeights[i][j] = this.friendlyWeights[i][j]*(1-geneMixRatio) + otherPlayer.friendlyWeights[i][j]*geneMixRatio;
+                    if (Math.random() < 0.75){ // more likely to pick own
+                        newWeights[i][j] = this.weights[i][j];
+                        newFriendlyWeights[i][j] = this.friendlyWeights[i][j];
+                    } else {
+                        newWeights[i][j] = otherPlayer.weights[i][j];
+                        newFriendlyWeights[i][j] = otherPlayer.friendlyWeights[i][j];
+                    }
                 }
             }
     
