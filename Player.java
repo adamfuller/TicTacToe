@@ -161,10 +161,10 @@ public class Player implements Saveable, Loadable{
         Player offspring;
         double newWeights[][] = new double[10][9];
         double newFriendlyWeights[][] = new double[10][9];
-
+        
+        double geneMixRatio = this.score/otherPlayer.getScore(); // ratio of this players wins to others
         for (int i = 0; i<this.weights.length; i++){
             for (int j = 0; j<this.weights[0].length; j++){
-                double geneMixRatio = Math.random();
                 newWeights[i][j] = this.weights[i][j]*geneMixRatio + otherPlayer.weights[i][j]*(1-geneMixRatio);
                 newFriendlyWeights[i][j] = this.friendlyWeights[i][j]*geneMixRatio + otherPlayer.friendlyWeights[i][j]*(1-geneMixRatio);
             }
