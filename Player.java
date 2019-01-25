@@ -2,11 +2,13 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Player implements Saveable, Loadable{
-    private static int playerNum = 0;
     public static Scanner scanner;
-    private double weights[][] = new double[10][9]; // 10th is for empty board
-    private double friendlyWeights[][] = new double[10][9];  // weighting for spots taken by friendly piece
+    private static int playerNum = 0;
+    private double weights[][] = new double[Board.boardSize*Board.boardSize + 1][Board.boardSize*Board.boardSize]; // 10th is for empty board
+    private double friendlyWeights[][] = new double[Board.boardSize*Board.boardSize+1][Board.boardSize*Board.boardSize];  // weighting for spots taken by friendly piece
     private int winCount = 0;
+    private int tieCount = 0;
+    private int lossCount = 0;
     private int score = 0;
     private int id;
     private boolean isUser = false;
@@ -19,8 +21,8 @@ public class Player implements Saveable, Loadable{
             Player.scanner = new Scanner(System.in);
         }
         this.id = Player.playerNum++;
-        for (int i = 0; i < 10; i++){
-            for (int j = 0; j<9; j++){
+        for (int i = 0; i < weights.length; i++){
+            for (int j = 0; j<weights[0].length; j++){
                 this.weights[i][j] = 1.0 - Math.random(); // get a random number greater than 0 up to and including 1
                 this.friendlyWeights[i][j] = 1.0 - Math.random();
             }
@@ -49,7 +51,7 @@ public class Player implements Saveable, Loadable{
     }
 
     public String toString(){
-        return "Player_"+id+"{ wins: " + winCount +"," +  "}";
+        return "Player_"+id+"{ wins: " + winCount +"," + " losses:" + this.lossCount + " ties: " + this.tieCount +  "}";
     }
 
 
@@ -61,7 +63,7 @@ public class Player implements Saveable, Loadable{
      */
     public int pick(int spots[], int playerNum){
         ArrayList<Integer> taken = new ArrayList<>();
-        final double weighting[] = new double[9];
+        final double weighting[] = new double[Board.boardSize*Board.boardSize];
         int chosen = -1;
 
         // record all taken spots
@@ -76,8 +78,8 @@ public class Player implements Saveable, Loadable{
 
         // if no spots are taken use default weighting
         if (taken.size() == 0){ // empty board
-            for (int i = 0; i<9; i++){
-                weighting[i] = this.weights[9][i];
+            for (int i = 0; i<spots.length; i++){
+                weighting[i] = this.weights[this.weights.length-1][i]; // last set is for empty board
             }
         }
 
@@ -87,11 +89,11 @@ public class Player implements Saveable, Loadable{
                 if (weighting[i] < -0.001){ // spot is taken
 
                 } else {
-                    if (spots[index] == playerNum){ // fiendly spot taken
-                        weighting[i] += this.friendlyWeights[index][i];
-                    } else { // non-friendly spot taken
+                    // if (spots[index] == playerNum){ // fiendly spot taken
+                    //     weighting[i] += this.friendlyWeights[index][i];
+                    // } else { // non-friendly spot taken
                         weighting[i] += this.weights[index][i];
-                    }
+                    // }
                 }
             }
         });
@@ -157,15 +159,21 @@ public class Player implements Saveable, Loadable{
     }
 
     public void hasLost(){
+        this.lossCount++;
         this.score-=2;
     }
 
     public void hasTied(){
+        this.tieCount++;
         this.score+=1;
     }
 
     public int getWins(){
         return this.winCount;
+    }
+
+    public int getLosses(){
+        return this.lossCount;
     }
 
     public int getScore(){
@@ -174,12 +182,14 @@ public class Player implements Saveable, Loadable{
 
     public void resetWins(){
         this.winCount = 0;
+        this.lossCount = 0;
+        this.tieCount = 0;
     }
 
     public Player breed(Player otherPlayer){
         Player offspring;
-        double newWeights[][] = new double[10][9];
-        double newFriendlyWeights[][] = new double[10][9];
+        double newWeights[][] = new double[this.weights.length][this.weights[0].length];
+        double newFriendlyWeights[][] = new double[this.friendlyWeights.length][this.friendlyWeights[0].length];
         
         if (this.score < otherPlayer.getScore()){
             double geneMixRatio = this.score/otherPlayer.getScore(); // ratio of this players wins to others
