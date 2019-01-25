@@ -11,13 +11,13 @@ public class MLTicTacToe {
         return true;
     }
 
-    public static void main(String args[]) { // filename carryOver generations
+    public static void main(String args[]) { // carryOver generations
         // ArrayList<Board> boards = new ArrayList<>();
         ArrayList<Player> players = new ArrayList<>();
         ArrayList<Player> winners = new ArrayList<>();
         ArrayList<Player> nextGen = new ArrayList<>();
-        int carryOver = args.length > 1 ? Integer.parseInt(args[1]) : 9; // number of players that carry over
-        int maxGeneration = args.length > 2 ? Integer.parseInt(args[2]) : 200;
+        int carryOver = args.length > 0 ? Integer.parseInt(args[0]) : 9; // number of players that carry over
+        int maxGeneration = args.length > 1 ? Integer.parseInt(args[1]) : 200;
         int numBoards = (int) ((carryOver - 1) * (carryOver / 2.0)); // allow for carryOver to evenly produce new gen
         int numPlayers = numBoards * 2; // double the number of boards
         boolean playRandomOpponent = true;
