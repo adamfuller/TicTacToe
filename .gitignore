@@ -23,3 +23,5 @@
 hs_err_pid*
 *.svbl
 .DS_Store
+.vs_code
+.vs_code/*
