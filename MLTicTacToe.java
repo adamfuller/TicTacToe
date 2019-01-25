@@ -11,13 +11,13 @@ public class MLTicTacToe {
         return true;
     }
 
-    public static void main(String args[]) {
+    public static void main(String args[]) { // filename carryOver generations
         // ArrayList<Board> boards = new ArrayList<>();
         ArrayList<Player> players = new ArrayList<>();
         ArrayList<Player> winners = new ArrayList<>();
         ArrayList<Player> nextGen = new ArrayList<>();
-        int generationNum = 0;
-        int carryOver = 9; // number of players that carry over
+        int carryOver = args.length > 1 ? Integer.parseInt(args[1]) : 9; // number of players that carry over
+        int maxGeneration = args.length > 1 ? Integer.parseInt(args[2]) : 200;
         int numBoards = (int) ((carryOver - 1) * (carryOver / 2.0)); // allow for carryOver to evenly produce new gen
         int numPlayers = numBoards * 2; // double the number of boards
         boolean playRandomOpponent = true;
@@ -30,7 +30,7 @@ public class MLTicTacToe {
             players.add(new Player());
         }
 
-        for (int n__ = 0; n__ < 200; n__++){ // generation loop
+        for (int currentGeneration = 0; currentGeneration < maxGeneration; currentGeneration++){ // generation loop
 
             winners = new ArrayList<>(); // clear winners (should be in players)
             nextGen = new ArrayList<>(); // clear the future generation (should be in players)
@@ -131,14 +131,13 @@ public class MLTicTacToe {
             }
 
             
-            System.out.println("Generation " + generationNum + " is complete");
+            System.out.println("Generation " + currentGeneration + " is complete");
             System.out.println("Carried Over: " + winners.size());
             System.out.println("New Players Bred: " + nextGen.size());
             System.out.println("Wins: " + numWins +" Ties: " + numTies + " Losses: " + numLosses);
             // System.out.println("Games Won: " + String.valueOf(winners.size()));
             // winners.forEach((p)->{System.out.println(p.toString());});
             
-            generationNum++;
         }
         // Every generation is done by here
         for (int i = 0; i<winners.size(); i++){
