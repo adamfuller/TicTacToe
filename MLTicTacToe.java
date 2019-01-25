@@ -101,7 +101,7 @@ public class MLTicTacToe {
                         if (winners.get(index).getScore() < p.getScore() && (indexToRemove == -1 || winners.get(index).getScore() < winners.get(indexToRemove).getScore()) ){
                             indexToRemove = index;
                             // System.out.println("Winner replaced");
-                            break;
+                            // break;
                         }
                     }
                     if (indexToRemove >= 0){
