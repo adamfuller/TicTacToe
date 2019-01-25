@@ -11,7 +11,7 @@ public class MLTicTacToe {
         return true;
     }
 
-    public static void main(String args[]) { // carryOver generations
+    public static void main(String args[]) { // carryOver generations randomOpp
         // ArrayList<Board> boards = new ArrayList<>();
         ArrayList<Player> players = new ArrayList<>();
         ArrayList<Player> winners = new ArrayList<>();
@@ -20,7 +20,7 @@ public class MLTicTacToe {
         int maxGeneration = args.length > 1 ? Integer.parseInt(args[1]) : 200;
         int numBoards = (int) ((carryOver - 1) * (carryOver / 2.0)); // allow for carryOver to evenly produce new gen
         int numPlayers = numBoards * 2; // double the number of boards
-        boolean playRandomOpponent = true;
+        boolean playRandomOpponent = args.length > 2 ? Boolean.parseBoolean(args[2]): false;
         int numWins = 0;
         int numTies = 0;
         int numLosses = 0;
@@ -69,8 +69,9 @@ public class MLTicTacToe {
                     }
                 }
             } else {
+                Board b;
                 for (int i = 0; i<numPlayers; i++){
-                    Board b = new Board(players.get(i)); // new board with random opponent
+                    b = new Board(players.get(i)); // new board with random opponent
                     while (!b.isFinished()){
                         b.play();
                     }
@@ -135,8 +136,7 @@ public class MLTicTacToe {
             System.out.println("Carried Over: " + winners.size());
             System.out.println("New Players Bred: " + nextGen.size());
             System.out.println("Wins: " + numWins +" Ties: " + numTies + " Losses: " + numLosses);
-            // System.out.println("Games Won: " + String.valueOf(winners.size()));
-            // winners.forEach((p)->{System.out.println(p.toString());});
+            System.gc(); // clear memory for the next round
             
         }
         // Every generation is done by here
