@@ -17,7 +17,7 @@ public class MLTicTacToe {
         ArrayList<Player> winners = new ArrayList<>();
         ArrayList<Player> nextGen = new ArrayList<>();
         int carryOver = args.length > 1 ? Integer.parseInt(args[1]) : 9; // number of players that carry over
-        int maxGeneration = args.length > 1 ? Integer.parseInt(args[2]) : 200;
+        int maxGeneration = args.length > 2 ? Integer.parseInt(args[2]) : 200;
         int numBoards = (int) ((carryOver - 1) * (carryOver / 2.0)); // allow for carryOver to evenly produce new gen
         int numPlayers = numBoards * 2; // double the number of boards
         boolean playRandomOpponent = true;
