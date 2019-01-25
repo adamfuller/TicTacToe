@@ -11,6 +11,15 @@ public class MLTicTacToe {
         return true;
     }
 
+    public static boolean atLeastOneUndefeated(ArrayList<Player> players){
+        for (Player p: players){
+            if (p.getLosses() == 0){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void main(String args[]) { // carryOver generations numPlayers randomOpp numRandomGames
         // ArrayList<Board> boards = new ArrayList<>();
         ArrayList<Player> players = new ArrayList<>();
@@ -25,6 +34,7 @@ public class MLTicTacToe {
         int randomGames = args.length > 4 ? Integer.parseInt(args[4]): 50;
         // compilation booleans
         boolean breedWinners = true;
+        boolean goTillUndefeated = true;
         // counters
         int numWins = 0;
         int numTies = 0;
@@ -35,8 +45,7 @@ public class MLTicTacToe {
             players.add(new Player());
         }
 
-        for (int currentGeneration = 0; currentGeneration < maxGeneration; currentGeneration++){ // generation loop
-
+        for (int currentGeneration = 0; currentGeneration < maxGeneration || (goTillUndefeated?!atLeastOneUndefeated(players):false); currentGeneration++){ // generation loop
             winners = new ArrayList<>(); // clear winners (should be in players)
             nextGen = new ArrayList<>(); // clear the future generation (should be in players)
 
