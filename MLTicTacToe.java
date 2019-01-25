@@ -16,12 +16,16 @@ public class MLTicTacToe {
         ArrayList<Player> players = new ArrayList<>();
         ArrayList<Player> winners = new ArrayList<>();
         ArrayList<Player> nextGen = new ArrayList<>();
+        // input arguments
         int carryOver = args.length > 0 ? Integer.parseInt(args[0]) : 9; // number of players that carry over
         int maxGeneration = args.length > 1 ? Integer.parseInt(args[1]) : 200;
-        int numBoards = (int) ((carryOver - 1) * (carryOver / 2.0)); // allow for carryOver to evenly produce new gen
+        // int numBoards = (int) ((carryOver - 1) * (carryOver / 2.0)); // allow for carryOver to evenly produce new gen
         int numPlayers = args.length > 2 ? Integer.parseInt(args[2]): ((carryOver - 1)*carryOver); // double the number of boards
-        boolean playRandomOpponent = args.length > 3 ? Boolean.parseBoolean(args[3]): false;
+        boolean playRandomOpponent = args.length > 3 ? Boolean.parseBoolean(args[3]): true;
         int randomGames = args.length > 4 ? Integer.parseInt(args[4]): 50;
+        // compilation booleans
+        boolean breedWinners = true;
+        // counters
         int numWins = 0;
         int numTies = 0;
         int numLosses = 0;
@@ -37,7 +41,7 @@ public class MLTicTacToe {
             nextGen = new ArrayList<>(); // clear the future generation (should be in players)
 
             for (Player p: players){ // clear all the player wins so old ones don't inherently carry over
-                p.resetWins();
+                p.resetCounts();
             }
 
             numWins = 0;
@@ -51,8 +55,8 @@ public class MLTicTacToe {
                         // System.out.println("--------- NEW GAME ---------");
                         while (!b.isFinished()){
                             b.play();
-                            // System.out.println(b.toString()); // print the board
                         }
+                        // System.out.println(b.toString()); // print the board
                         Player winner = b.getWinner();
                         Player loser = b.getLoser();
                         if (winner != null){
@@ -121,7 +125,7 @@ public class MLTicTacToe {
 
             int mostWins = 0;
             int leastLosses = Integer.MAX_VALUE;
-            double winLossRatio = 0.0;
+            double highestScore = 0.0;
             String bestWLRName = "";
             // breed the winners to form the next generation
             for (int i = 0; i < winners.size(); i++) { // iterate through all
@@ -132,15 +136,18 @@ public class MLTicTacToe {
                 if (winners.get(i).getLosses() < leastLosses){
                     leastLosses = winners.get(i).getLosses();
                 }
-                if (winners.get(i).getWins()/(winners.get(i).getLosses()>0?winners.get(i).getLosses():1) > winLossRatio){
-                    winLossRatio = winners.get(i).getWins()/(winners.get(i).getLosses()>0?winners.get(i).getLosses():1);
+                if (winners.get(i).getScore() > highestScore){
+                    highestScore = winners.get(i).getScore();
                     bestWLRName = winners.get(i).toString();
                 }
 
                 // breeding section
                 // nextGen.add(winners.get(i).breed(winners.get(winners.size()-i-1)));
-                for (int j = i + 1; j < winners.size(); j++) { // iterate through remaining
-                    nextGen.add(winners.get(i).breed(winners.get(j)));
+
+                if (breedWinners){
+                    for (int j = i + 1; j < winners.size(); j++) { // iterate through remaining
+                        nextGen.add(winners.get(i).breed(winners.get(j)));
+                    }
                 }
             }
 
@@ -161,13 +168,13 @@ public class MLTicTacToe {
 
             
             System.out.println("Generation " + currentGeneration + " is complete");
-            System.out.println("Carried Over: " + winners.size());
-            System.out.println("New Players Bred: " + (nextGen.size()-winners.size()) );
+            // System.out.println("Carried Over: " + winners.size());
+            // System.out.println("New Players Bred: " + (nextGen.size()-winners.size()) );
             System.out.println("Most Wins: " + mostWins);
             System.out.println("Least Losses: " + leastLosses);
             System.out.println("Best Player: " + bestWLRName);
             // System.out.println("Wins: " + numWins +" Ties: " + numTies + " Losses: " + numLosses);
-            System.gc(); // clear memory for the next round
+            // System.gc(); // clear memory for the next round
             
         }
         // Every generation is done by here

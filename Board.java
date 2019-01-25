@@ -132,6 +132,7 @@ public class Board {
                     }
                 }
                 isFinished = wasAllSame;
+                if (isFinished) break;
             }
             // if (this.spots[checks[0]] != -1 && this.spots[checks[0]] == this.spots[checks[1]] && this.spots[checks[1]] == this.spots[checks[2]]){
             //     isFinished = true;
@@ -192,6 +193,10 @@ public class Board {
      */
     public int getTurn(){
         return this.turn;
+    }
+
+    public int[][] getWinning(){
+        return this.winning;
     }
 
     private void calculateWinning(){
