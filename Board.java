@@ -12,7 +12,6 @@ public class Board {
      * 
      * @param player1 - first player
      * @param player2 - second player
-     * @throws InvalidBoardException if the players can not be added
      */
     public Board(Player player1, Player player2) {
         this.players[0] = player1;
@@ -30,6 +29,21 @@ public class Board {
         } else if (player2.isUser() && this.turn == 1){
             System.out.println("Player 2 is o, User moves first");
         }
+    }
+
+     /**
+     * Create a board with two players the starting turn is decided randomly
+     * <p>
+     * Connects player1 and player2 to this board
+     * 
+     * @param player1 - first player
+     */
+    public Board(Player player1) {
+        this.players[0] = player1;
+        this.players[1] = null;
+
+        this.turn = Math.random() > 0.5 ? 1 : 0;
+
     }
 
     public String toString(){
@@ -67,9 +81,11 @@ public class Board {
     public void play() {
         if (!this.isFinished()){
             Player p = this.players[this.turn];
-    
-            this.spots[p.pick(this.spots, this.turn)] = this.turn;
-    
+            if (p!=null){
+                this.spots[p.pick(this.spots, this.turn)] = this.turn;
+            } else {
+                this.spots[Player.pickRandom(this.spots)] = this.turn;
+            }
             this.turn = (this.turn + 1) % 2;
         }
     }
@@ -138,8 +154,12 @@ public class Board {
     }
 
     public void setTies(){
-        this.players[0].hasTied();
-        this.players[1].hasTied();
+        if (this.players[0] != null){
+            this.players[0].hasTied();
+        }
+        if (this.players[1] != null){
+            this.players[1].hasTied();
+        }
     }
 
     /**
@@ -150,9 +170,4 @@ public class Board {
         return this.turn;
     }
 
-    private class InvalidBoardException extends Exception {
-        public InvalidBoardException(String message) {
-            System.out.println(message);
-        }
-    }
 }

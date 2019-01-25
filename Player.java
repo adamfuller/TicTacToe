@@ -109,6 +109,25 @@ public class Player implements Saveable, Loadable{
         return chosen;
     }
 
+    /**
+     * Pick a random spot on the board
+     * @param spots - board to pick from
+     * @return - position on board chosen
+     */
+    public static int pickRandom(int spots[]){
+        ArrayList<Integer> avail = new ArrayList<>();
+
+        // record all taken spots
+        for (int i = 0; i<spots.length; i++){
+            if (spots[i] == -1){ // if the spot is taken record it
+                avail.add(i);
+            } else {
+            }
+        }
+
+        return avail.get((int) (Math.random() * avail.size()));
+    }
+
     public int userPick(int spots[]){
         int chosen = -1;
 
@@ -162,15 +181,29 @@ public class Player implements Saveable, Loadable{
         double newWeights[][] = new double[10][9];
         double newFriendlyWeights[][] = new double[10][9];
         
-        double geneMixRatio = this.score/otherPlayer.getScore(); // ratio of this players wins to others
-        for (int i = 0; i<this.weights.length; i++){
-            for (int j = 0; j<this.weights[0].length; j++){
-                newWeights[i][j] = this.weights[i][j]*geneMixRatio + otherPlayer.weights[i][j]*(1-geneMixRatio);
-                newFriendlyWeights[i][j] = this.friendlyWeights[i][j]*geneMixRatio + otherPlayer.friendlyWeights[i][j]*(1-geneMixRatio);
+        if (this.score < otherPlayer.getScore()){
+            double geneMixRatio = this.score/otherPlayer.getScore(); // ratio of this players wins to others
+    
+            for (int i = 0; i<this.weights.length; i++){
+                for (int j = 0; j<this.weights[0].length; j++){
+                    newWeights[i][j] = this.weights[i][j]*geneMixRatio + otherPlayer.weights[i][j]*(1-geneMixRatio);
+                    newFriendlyWeights[i][j] = this.friendlyWeights[i][j]*geneMixRatio + otherPlayer.friendlyWeights[i][j]*(1-geneMixRatio);
+                }
             }
+    
+            offspring = new Player(newWeights, newFriendlyWeights);
+        } else {
+            double geneMixRatio = otherPlayer.getScore()/this.score; // ratio of this players wins to others
+    
+            for (int i = 0; i<this.weights.length; i++){
+                for (int j = 0; j<this.weights[0].length; j++){
+                    newWeights[i][j] = this.weights[i][j]*(1-geneMixRatio) + otherPlayer.weights[i][j]*geneMixRatio;
+                    newFriendlyWeights[i][j] = this.friendlyWeights[i][j]*(1-geneMixRatio) + otherPlayer.friendlyWeights[i][j]*geneMixRatio;
+                }
+            }
+    
+            offspring = new Player(newWeights, newFriendlyWeights);
         }
-
-        offspring = new Player(newWeights, newFriendlyWeights);
         return offspring;
     }
 

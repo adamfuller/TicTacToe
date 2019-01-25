@@ -20,6 +20,10 @@ public class MLTicTacToe {
         int carryOver = 9; // number of players that carry over
         int numBoards = (int) ((carryOver - 1) * (carryOver / 2.0)); // allow for carryOver to evenly produce new gen
         int numPlayers = numBoards * 2; // double the number of boards
+        boolean playRandomOpponent = true;
+        int numWins = 0;
+        int numTies = 0;
+        int numLosses = 0;
 
         // Create generation 0
         for (int i = 0; i < numPlayers; i++) {
@@ -28,22 +32,20 @@ public class MLTicTacToe {
 
         for (int n__ = 0; n__ < 200; n__++){ // generation loop
 
-            // boards = new ArrayList<>(); // clear the boards (all should be full and more will be made)
             winners = new ArrayList<>(); // clear winners (should be in players)
             nextGen = new ArrayList<>(); // clear the future generation (should be in players)
-
-            // for (int i = 0; i < numBoards / 2; i++) {
-            //     boards.add(new Board(players.get(i), players.get(players.size() - i - 1)));
-            // }
 
             for (Player p: players){ // clear all the player wins so old ones don't inherently carry over
                 p.resetWins();
             }
 
-            // have each player play every other player
-            for (int i = 0; i<numPlayers-1; i++){
-                for (int j = i; j<numPlayers; j++){
-                    try{
+            numWins = 0;
+            numTies = 0;
+            numLosses = 0;
+            if (!playRandomOpponent){
+                // have each player play every other player
+                for (int i = 0; i<numPlayers-1; i++){
+                    for (int j = i; j<numPlayers; j++){
                         Board b = new Board(players.get(i), players.get(j));
                         // System.out.println("--------- NEW GAME ---------");
                         while (!b.isFinished()){
@@ -54,52 +56,40 @@ public class MLTicTacToe {
                         Player loser = b.getLoser();
                         if (winner != null){
                             winner.hasWon();
+                            numWins++;
                         }
                         if (loser != null){
                             loser.hasLost();
+                            numLosses++; // should be same as wins
                         }
                         if (loser == null && winner == null){
                             b.setTies();
+                            numTies++;
                         }
-                    }catch (Exception e){
-
+                    }
+                }
+            } else {
+                for (int i = 0; i<numPlayers; i++){
+                    Board b = new Board(players.get(i)); // new board with random opponent
+                    while (!b.isFinished()){
+                        b.play();
+                    }
+                    Player winner = b.getWinner();
+                    Player loser = b.getLoser();
+                    if (winner != null){
+                        winner.hasWon();
+                        numWins++;
+                    }
+                    if (loser != null){
+                        loser.hasLost();
+                        numLosses++;
+                    }
+                    if (loser == null && winner == null){
+                        b.setTies();
+                        numTies++;
                     }
                 }
             }
-
-            // int roundNum = 0;
-            // // play the boards until they're all done
-            // while (!MLTicTacToe.allBoardsFinished(boards)) {
-            //     roundNum++;
-            //     boards.forEach((board) -> {
-            //         board.play();
-            //     });
-            // }
-
-            // count the winners and add them to the winners array
-            // int numWinners = 0;
-            // for (int i = 0; i < boards.size(); i++) {
-            //     Player p = boards.get(i).getWinner();
-            //     if (p != null) {
-            //         p.hasWon(); // increase the players win count
-            //         numWinners++;
-            //         if (winners.size() < carryOver) {
-            //             winners.add(p);
-            //         } else {
-            //             // Kick out players that have fewer wins than this one # TODO
-            //             for (int index = 0; index < winners.size(); index++){
-            //                 if (winners.get(index).getWins() < p.getWins()){
-            //                     System.out.println("Winner replaced");
-            //                     winners.remove(index);
-            //                     winners.add(p);
-            //                     break;
-            //                 }
-            //             }
-            //         }
-            //     } else {
-            //         // System.out.println("No winner");
-            //     }
-            // }
 
             for (Player p: players){
                 if (winners.size() < carryOver){
@@ -144,6 +134,7 @@ public class MLTicTacToe {
             System.out.println("Generation " + generationNum + " is complete");
             System.out.println("Carried Over: " + winners.size());
             System.out.println("New Players Bred: " + nextGen.size());
+            System.out.println("Wins: " + numWins +" Ties: " + numTies + " Losses: " + numLosses);
             // System.out.println("Games Won: " + String.valueOf(winners.size()));
             // winners.forEach((p)->{System.out.println(p.toString());});
             
@@ -153,15 +144,7 @@ public class MLTicTacToe {
         for (int i = 0; i<winners.size(); i++){
             winners.get(i).save("Player" + i + ".svbl");
         }
-        // Player playerToSave = null;
-        // for (Player p: players){
-        //     if (playerToSave == null){
-        //         playerToSave = p;
-        //     } else if (p.getWins() > playerToSave.getWins()){
-        //         playerToSave = p;
-        //     }
-        // }
-        // playerToSave.save();
+
 
     }
 }
