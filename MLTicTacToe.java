@@ -191,7 +191,10 @@ public class MLTicTacToe {
         }
         // Every generation is done by here
         for (int i = 0; i<winners.size(); i++){
-            winners.get(i).save("Player" + i + ".svbl");
+            int w = winners.get(i).getWins();
+            int l = winners.get(i).getLosses();
+            int t = winners.get(i).getTies();
+            winners.get(i).save("Player_" + i + "-w"+w+"l"+l+"t"+t+ ".svbl");
         }
 
 

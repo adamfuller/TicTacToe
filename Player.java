@@ -222,6 +222,10 @@ public class Player implements Saveable, Loadable{
     public int getLosses(){
         return this.lossCount;
     }
+    
+    public int getTies(){
+        return this.tieCount;
+    }
 
     public int getScore(){
         return this.score;
