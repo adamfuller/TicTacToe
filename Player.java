@@ -24,7 +24,7 @@ public class Player implements Saveable, Loadable{
     private boolean useWeighting = true;
     private static boolean startEmpty = true;
     private static boolean useFriendly = true;
-    private static double mutationRate = 0.01;
+    private static double mutationRate = 0.001;
 
     /**
      * Create a new player and assign its weighting matrices

@@ -13,7 +13,7 @@ public class MLTicTacToe {
 
     public static boolean atLeastOneUndefeated(ArrayList<Player> players){
         for (Player p: players){
-            if (p.getLosses() == 0){
+            if (p.getWins() > 0 && p.getLosses() == 0){
                 return true;
             }
         }
@@ -168,7 +168,7 @@ public class MLTicTacToe {
 
             // add the next generation to the players
             for (int i = 0; i < numPlayers; i++) {
-                if (i < carryOver && nextGen.size() > i) {
+                if (i < nextGen.size()) {
                     players.add(nextGen.get(i));
                 } else {
                     players.add(new Player());
@@ -178,7 +178,7 @@ public class MLTicTacToe {
             
             System.out.println("Generation " + currentGeneration + " is complete");
             // System.out.println("Carried Over: " + winners.size());
-            // System.out.println("New Players Bred: " + (nextGen.size()-winners.size()) );
+            System.out.println("New Players Bred: " + (nextGen.size()-winners.size()) );
             System.out.println("Most Wins: " + mostWins);
             System.out.println("Least Losses: " + leastLosses);
             System.out.println("Best Player: " + bestWLRName);
