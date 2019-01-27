@@ -12,11 +12,11 @@ public class PvCTicTacToe{
         while(!board.isFinished()){
             board.playUser();
             System.out.println(board.toString());
-            for (int[] a : board.getWinning()){
-                System.out.print("{");
-                for (int i:a) System.out.print(""+i+",");
-                System.out.println("}");
-            }
+            //for (int[] a : board.getWinning()){
+            //    System.out.print("{");
+            //    for (int i:a) System.out.print(""+i+",");
+            //    System.out.println("}");
+            //}
         }
         
     }

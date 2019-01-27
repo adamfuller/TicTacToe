@@ -13,7 +13,8 @@ public class MLTicTacToe {
 
     public static boolean atLeastOneUndefeated(ArrayList<Player> players){
         for (Player p: players){
-            if (p.getWins() > 0 && p.getLosses() == 0){
+            if (p.getScore() > 0 && p.getLosses() == 0){
+                System.out.println("Someone was undefeated~~~~~~~~~~~");
                 return true;
             }
         }
@@ -45,7 +46,7 @@ public class MLTicTacToe {
             players.add(new Player());
         }
 
-        for (int currentGeneration = 0; currentGeneration < maxGeneration || (goTillUndefeated?!atLeastOneUndefeated(players):false); currentGeneration++){ // generation loop
+        for (int currentGeneration = 0; (goTillUndefeated?true:(currentGeneration < maxGeneration)); currentGeneration++){ // generation loop
             winners = new ArrayList<>(); // clear winners (should be in players)
             nextGen = new ArrayList<>(); // clear the future generation (should be in players)
 
@@ -160,7 +161,9 @@ public class MLTicTacToe {
                 }
             }
 
-            
+            if (atLeastOneUndefeated(players)){
+                break;
+            }
 
 
             // clear the players
