@@ -81,7 +81,7 @@ public class MLTicTacToe {
 
             
             players.stream() // make a stream
-                .sorted((p1, p2) -> p2.compareTo(p1)) // sort greatest score to least
+                .sorted((p1, p2) -> p1.compareTo(p2)) // sort greatest score to least
                 .forEachOrdered((p)->{ // add carryOver # of players to the winners list
                 if (winners.size() < carryOver){
                     winners.add(p);
@@ -108,11 +108,11 @@ public class MLTicTacToe {
 
             // END OF GENERATION
             try{
-                Player best = players.stream().max((p1, p2) -> p2.compareTo(p1)).get();
-                System.out.println("Generation " + currentGeneration + " is complete");
-                System.out.println("New Players Bred: " + (nextGen.size()-winners.size()));
-                System.out.println("Highest Score: " + best.getScore());
-                System.out.println("Best Player: " + best.toString());
+                Player best = winners.stream().max((p1, p2) -> p1.compareTo(p2)).get();
+                // System.out.println("Generation " + currentGeneration + " is complete");
+                // System.out.println("New Players Bred: " + (nextGen.size()-winners.size()));
+                // System.out.println("Highest Score: " + best.getScore());
+                System.out.println("" + best.getWins() + "," + best.getLosses() + "," + best.getTies());
             } catch (Exception e){}
 
             
@@ -131,7 +131,7 @@ public class MLTicTacToe {
         }
 
         // Every generation is done by here
-        winners.stream().sorted((p1, p2) -> p2.compareTo(p1)).forEachOrdered((p)->{
+        winners.stream().sorted((p1, p2) -> p1.compareTo(p2)).forEachOrdered((p)->{
             p.save(p.getSaveString());
         });
     }
