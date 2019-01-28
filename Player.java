@@ -11,6 +11,7 @@ import java.util.Scanner;
 public class Player implements Saveable, Loadable{
     public static Scanner scanner;
     private static int playerNum = 0;
+    private static int saveNum = 0;
     private double weights[][] = new double[Board.boardSize*Board.boardSize + 1][Board.boardSize*Board.boardSize]; // 10th is for empty board
     private int moves[] = new int[Board.boardSize*Board.boardSize];
     private double friendlyWeights[][] = new double[Board.boardSize*Board.boardSize+1][Board.boardSize*Board.boardSize];  // weighting for spots taken by friendly piece
@@ -74,6 +75,17 @@ public class Player implements Saveable, Loadable{
 
     public String toString(){
         return "Player_"+id+"{ wins: " + winCount +"," + " losses:" + this.lossCount + " ties: " + this.tieCount +  "}";
+    }
+
+    /**
+     * Returns 1 if this player has a higher score,
+     * 0 if they have the same score and, 
+     * -1 if this player has a lower score
+     * @param p player to compare against
+     * @return
+     */
+    public int compareTo(Player p){
+        return p.getScore() == this.score ? 0 : ( p.getScore() > this.score ? 1 : -1); 
     }
 
     private void setupMoves(){
@@ -362,6 +374,16 @@ public class Player implements Saveable, Loadable{
             }
         }
         return -1;
+    }
+
+    /**
+     * Get the number to save this player as
+     * @return
+     */
+    public String getSaveString(){
+        String saveString = "Player_" +Player.saveNum+ "-W"+this.winCount+"L"+this.lossCount+"T"+this.tieCount+ ".svbl";
+        Player.saveNum++;
+        return saveString;
     }
 
 }

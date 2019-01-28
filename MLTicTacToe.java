@@ -2,26 +2,8 @@ import java.util.ArrayList;
 
 public class MLTicTacToe {
 
-    public static boolean allBoardsFinished(ArrayList<Board> boards) {
-        for (Board board : boards) {
-            if (!board.isFinished()) {
-                return false;
-            }
-        }
-        return true;
-    }
 
-    public static boolean atLeastOneUndefeated(ArrayList<Player> players){
-        for (Player p: players){
-            if (p.getScore() > 0 && p.getLosses() == 0){
-                System.out.println("Someone was undefeated~~~~~~~~~~~");
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static void main(String args[]) { // carryOver generations numPlayers randomOpp numRandomGames
+    public static void main(String args[]) { // carryOver generations numPlayers randomOpp numRandomGames goTillUndefeated
         // ArrayList<Board> boards = new ArrayList<>();
         ArrayList<Player> players = new ArrayList<>();
         ArrayList<Player> winners = new ArrayList<>();
@@ -35,11 +17,7 @@ public class MLTicTacToe {
         int randomGames = args.length > 4 ? Integer.parseInt(args[4]): 50;
         // compilation booleans
         boolean breedWinners = true;
-        boolean goTillUndefeated = true;
-        // counters
-        int numWins = 0;
-        int numTies = 0;
-        int numLosses = 0;
+        boolean goTillUndefeated = args.length> 5 ? Boolean.parseBoolean(args[5]):false;
 
         // Create generation 0
         for (int i = 0; i < numPlayers; i++) {
@@ -47,16 +25,13 @@ public class MLTicTacToe {
         }
 
         for (int currentGeneration = 0; (goTillUndefeated?true:(currentGeneration < maxGeneration)); currentGeneration++){ // generation loop
-            winners = new ArrayList<>(); // clear winners (should be in players)
-            nextGen = new ArrayList<>(); // clear the future generation (should be in players)
+            winners.clear(); // clear winners (should be in players)
+            nextGen.clear(); // clear the future generation (should be in players)
 
             for (Player p: players){ // clear all the player wins so old ones don't inherently carry over
                 p.resetCounts();
             }
 
-            numWins = 0;
-            numTies = 0;
-            numLosses = 0;
             if (!playRandomOpponent){
                 // have each player play every other player
                 for (int i = 0; i<numPlayers-1; i++){
@@ -71,23 +46,20 @@ public class MLTicTacToe {
                         Player loser = b.getLoser();
                         if (winner != null){
                             winner.hasWon();
-                            numWins++;
                         }
                         if (loser != null){
                             loser.hasLost();
-                            numLosses++; // should be same as wins
                         }
                         if (loser == null && winner == null){
                             b.setTies();
-                            numTies++;
                         }
                     }
                 }
             } else {
                 Board b;
                 for (int runNum = 0; runNum < randomGames; runNum++){
-                    for (int i = 0; i<numPlayers; i++){
-                        b = new Board(players.get(i)); // new board with random opponent
+                    for (Player p : players){
+                        b = new Board(p); // new board with random opponent
                         while (!b.isFinished()){
                             b.play();
                         }
@@ -96,78 +68,56 @@ public class MLTicTacToe {
                         Player loser = b.getLoser();
                         if (winner != null){
                             winner.hasWon();
-                            numWins++;
                         }
                         if (loser != null){
                             loser.hasLost();
-                            numLosses++;
                         }
                         if (loser == null && winner == null){
                             b.setTies();
-                            numTies++;
                         }
                     }
                 }
             }
 
-            for (Player p: players){
+            
+            players.stream() // make a stream
+                .sorted((p1, p2) -> p2.compareTo(p1)) // sort greatest score to least
+                .forEachOrdered((p)->{ // add carryOver # of players to the winners list
                 if (winners.size() < carryOver){
                     winners.add(p);
-                } else {
-                    int indexToRemove = -1;
-                    for (int index = 0; index < winners.size(); index++){
-                        // if current players score is higher than the current winner being check
-                        if (winners.get(index).getScore() < p.getScore()){
-                            // if first index checked or the current winner's score is less than the current winner to be replaced
-                            if(indexToRemove == -1 || winners.get(index).getScore() < winners.get(indexToRemove).getScore()){
-                                indexToRemove = index;
-                                // System.out.println("Winner replaced");
-                                // break;
-                            }
-                        } 
-                    }
-                    if (indexToRemove >= 0){
-                        winners.remove(indexToRemove);
-                        winners.add(p);
-                    }
                 }
-            }
+            });
 
-            int mostWins = 0;
-            int leastLosses = Integer.MAX_VALUE;
-            double highestScore = 0.0;
-            String bestWLRName = "";
             // breed the winners to form the next generation
             for (int i = 0; i < winners.size(); i++) { // iterate through all
                 nextGen.add(winners.get(i)); // add winner to next gen
-                if (winners.get(i).getWins() > mostWins){
-                    mostWins = winners.get(i).getWins();
-                }
-                if (winners.get(i).getLosses() < leastLosses){
-                    leastLosses = winners.get(i).getLosses();
-                }
-                if (winners.get(i).getScore() > highestScore){
-                    highestScore = winners.get(i).getScore();
-                    bestWLRName = winners.get(i).toString();
-                }
 
                 // breeding section
-                // nextGen.add(winners.get(i).breed(winners.get(winners.size()-i-1)));
-
                 if (breedWinners){
                     for (int j = i + 1; j < winners.size(); j++) { // iterate through remaining
-                        nextGen.add(winners.get(i).breed(winners.get(j)));
+                        nextGen.add(winners.get(i).breed(winners.get(j))); // add offspring to next gen
                     }
                 }
             }
 
-            if (atLeastOneUndefeated(players)){
+            // if any went undefeated stop
+            if (goTillUndefeated && players.stream().anyMatch((p)->p.getLosses() == 0)){
                 break;
             }
 
 
+            // END OF GENERATION
+            try{
+                Player best = players.stream().max((p1, p2) -> p2.compareTo(p1)).get();
+                System.out.println("Generation " + currentGeneration + " is complete");
+                System.out.println("New Players Bred: " + (nextGen.size()-winners.size()));
+                System.out.println("Highest Score: " + best.getScore());
+                System.out.println("Best Player: " + best.toString());
+            } catch (Exception e){}
+
+            
             // clear the players
-            players = new ArrayList<>();
+            players.clear();
 
             // add the next generation to the players
             for (int i = 0; i < numPlayers; i++) {
@@ -177,26 +127,12 @@ public class MLTicTacToe {
                     players.add(new Player());
                 }
             }
-
-            
-            System.out.println("Generation " + currentGeneration + " is complete");
-            // System.out.println("Carried Over: " + winners.size());
-            System.out.println("New Players Bred: " + (nextGen.size()-winners.size()) );
-            System.out.println("Most Wins: " + mostWins);
-            System.out.println("Least Losses: " + leastLosses);
-            System.out.println("Best Player: " + bestWLRName);
-            // System.out.println("Wins: " + numWins +" Ties: " + numTies + " Losses: " + numLosses);
-            // System.gc(); // clear memory for the next round
             
         }
+
         // Every generation is done by here
-        for (int i = 0; i<winners.size(); i++){
-            int w = winners.get(i).getWins();
-            int l = winners.get(i).getLosses();
-            int t = winners.get(i).getTies();
-            winners.get(i).save("Player_" + i + "-w"+w+"l"+l+"t"+t+ ".svbl");
-        }
-
-
+        winners.stream().sorted((p1, p2) -> p2.compareTo(p1)).forEachOrdered((p)->{
+            p.save(p.getSaveString());
+        });
     }
 }
