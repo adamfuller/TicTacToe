@@ -31,23 +31,7 @@ public class Player implements Saveable, Loadable{
      * Create a new player and assign its weighting matrices
      */
     public Player(){
-        if (Player.scanner == null){
-            Player.scanner = new Scanner(System.in);
-        }
-        this.id = Player.playerNum++;
-        for (int i = 0; i < weights.length; i++){
-            for (int j = 0; j<weights[0].length; j++){
-                if (Player.startEmpty){
-                    this.weights[i][j] = 0;
-                    this.friendlyWeights[i][j] = 0;
-                } else {
-                    this.weights[i][j] = getRandomGene(); // get a random number between -1 and 1
-                    this.friendlyWeights[i][j] = getRandomGene();
-                }
-            }
-        }
-
-        this.setupMoves();
+        this(null, null, null, 0.0, false);
     }
 
     /**
@@ -55,22 +39,67 @@ public class Player implements Saveable, Loadable{
      * @param isUser - true if user
      */
     public Player(boolean isUser){
-        if (Player.scanner == null){
-            Player.scanner = new Scanner(System.in);
-        }
-        this.id = Player.playerNum++;
-        this.isUser = isUser;
+        this(null, null, null, 0.0, true);
+    }
+
+    /**
+     * Create a new Player with genes based on mutationRate
+     * @param mutationRate - 0.0-1.0 chance of mutation
+     */
+    public Player(double mutationRate){
+        this(null, null, null, mutationRate, false);
     }
 
     public Player(double weights[][], double friendlyWeights[][], int moves[]){
-        if (Player.scanner == null){
-            Player.scanner = new Scanner(System.in);
-        }
-        this.id = Player.playerNum++;
-        this.weights = weights;
-        this.friendlyWeights = friendlyWeights;
+        this(weights, friendlyWeights, moves, 0.0, false);
+    }
 
-        this.moves = moves;
+    /**
+     * Create a player with optional weighting, moves, initial mutation rate, and as a user
+     * @param weights - array for weighting of spots
+     * @param friendlyWeights
+     * @param moves - designated moves for the player to follow
+     * @param mutationRate - 0.0-1.0 rate of mutation
+     * @param isUser - if true will prompt during play
+     */
+    public Player(double weights[][], double friendlyWeights[][], int moves[], double mutationRate, boolean isUser){
+        this.id = Player.playerNum++;
+        if (isUser){
+            if (Player.scanner == null){
+                Player.scanner = new Scanner(System.in);
+            }
+            this.isUser = isUser;
+            return; // end of stuff if they're a user
+        }
+
+        if (weights!=null){
+            this.weights = weights;
+        }
+        if (friendlyWeights != null){
+            this.friendlyWeights = friendlyWeights;
+        }
+        if (moves != null){
+            this.moves = moves;
+        } else {
+            this.setupMoves();
+        }
+        if (weights != null && friendlyWeights != null && moves != null){
+            return; // done calculating everything
+        }
+
+        for (int i = 0; i < this.weights.length; i++){
+            for (int j = 0; j<this.weights[0].length; j++){
+                if (!Player.startEmpty && Math.random() < mutationRate) {
+                    this.weights[i][j] = getRandomGene(); // get a random number between -1 and 1
+                    if (Math.random() < mutationRate){
+                        this.friendlyWeights[i][j] = getRandomGene();
+                    }
+                } else if (Player.startEmpty){
+                    this.weights[i][j] = 0;
+                    this.friendlyWeights[i][j] = 0;
+                }
+            }
+        }
     }
 
     public String toString(){

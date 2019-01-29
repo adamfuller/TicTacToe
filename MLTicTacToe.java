@@ -124,7 +124,8 @@ public class MLTicTacToe {
                 if (i < nextGen.size()) {
                     players.add(nextGen.get(i));
                 } else {
-                    players.add(new Player());
+                    // generate new player with more mutations
+                    players.add(new Player(0.5));
                 }
             }
             
