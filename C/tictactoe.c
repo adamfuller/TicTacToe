@@ -61,7 +61,6 @@ typedef struct Board
     enum Piece currentTurn;
 } Board;
 
-
 typedef struct Bot
 {
     int gamesRecorded;
@@ -94,6 +93,7 @@ enum Result determineResult(Board *b);
 void recordBot(Bot *b);
 void loadBot(Bot *b);
 void addBoard(Bot *bot, Board *b);
+void printResult(Board *b);
 
 int main(int argc, char *argv[])
 {
@@ -110,27 +110,19 @@ int main(int argc, char *argv[])
     if (argc > 2 && (!strcmp(argv[2], "-c") || !strcmp(argv[1], "-c")))
         useBot = 1;
 
-    printf("%d\n", bot.gamesRecorded);
-    // printBoard(&bot.history[bot.gamesRecorded]);
+    // printBoard(&bot.history[bot.gamesRecorded-1]);
 
-    // if (argc == 1)
-    // {
-    //     for (int i = 0; i < bot.gamesRecorded; i++)
-    //     {
-    //         printBoard(&bot.history[i]);
-    //     }
-    // }
-
-    if (argc > 1) {
+    if (argc > 1)
+    {
         inputPosition = atoi(argv[1]);
         // Only allow empty spots to be taken
         if (b1.spots[inputPosition] == Empty)
         {
             selectSpot(&b1, inputPosition);
-            // printBoard(&b1);
             b1.result = determineResult(&b1);
+            recordBoard(&b1);
 
-            // Add the board
+            // Determine if the board should be saved
             int copyOver = 1;
             for (int i = 0; i < bot.gamesRecorded; i++)
             {
@@ -141,38 +133,39 @@ int main(int argc, char *argv[])
                 }
             }
 
-            if (copyOver){
+            // Add the board to the bot's history
+            if (copyOver)
+            {
                 printf("Copying the board\n");
                 bot.history[bot.gamesRecorded].currentTurn = b1.currentTurn;
                 bot.history[bot.gamesRecorded].length = b1.length;
                 bot.history[bot.gamesRecorded].size = b1.size;
-                for (int j = 0; j<9; j++){
+                for (int j = 0; j < 9; j++)
                     bot.history[bot.gamesRecorded].spots[j] = b1.spots[j];
-                }
+
                 bot.history[bot.gamesRecorded].result = b1.result;
+
                 printBoard(&bot.history[bot.gamesRecorded]);
+
+                bot.gamesRecorded++;
+                printf("%d\n", bot.gamesRecorded);
+                recordBot(&bot);
             }
 
-            bot.gamesRecorded++;
-            recordBot(&bot);
-            recordBoard(&b1);
-            if (b1.result == Win)
-            {
-                printf("You Won!!\n");
-            }
-            else if (b1.result == Lose)
-            {
-                printf("You Lost!!\n");
-            }
-            else if (b1.result == Tie)
-            {
-                printf("You Tied!!\n");
-            }
+            printResult(&b1);
         }
         else
         {
             printBoard(&b1);
             printf("That spot is taken\n");
+        }
+    }
+    else
+    {
+        for (int i = 0; i < bot.gamesRecorded; i++)
+        {
+            printBoard(&bot.history[i]);
+            printResult(&bot.history[i]);
         }
     }
 
@@ -305,6 +298,24 @@ void printBoard(Board *b)
 {
     for (int i = 0; i < b->length; i += 3)
         printf("%c\t%c\t%c\n", b->spots[i], b->spots[i + 1], b->spots[i + 2]);
+}
+
+void printResult(Board *b)
+{
+    if (b->result == Win)
+    {
+        printf("You Won!!\n");
+    }
+    else if (b->result == Lose)
+    {
+        printf("You Lost!!\n");
+    }
+    else if (b->result == Tie)
+    {
+        printf("You Tied!!\n");
+    } else if (b->result == Neutral) {
+        printf("Neutral\n");
+    }
 }
 
 /**
