@@ -119,6 +119,13 @@ int main(int argc, char *argv[])
         test();
         return 0;
     }
+    if (argc > 1 && !strcmp(argv[1], "-n"))
+    {
+        // Load the default board into the current board.
+        Board b2 = DEFAULT_BOARD;
+        recordBoard(&b2);
+        return 0;
+    }
     int inputPosition = -1;
     // Initialize board
     Board b1 = DEFAULT_BOARD;
@@ -126,6 +133,7 @@ int main(int argc, char *argv[])
     // Load board from data
     loadBoard(&b1);
     loadBot(&bot);
+
     // printBoard(&b1);
     int useBot = 0;
     // Use the bot if arg 1 or 2 is -c
@@ -138,7 +146,7 @@ int main(int argc, char *argv[])
     {
         inputPosition = atoi(argv[1]);
         // Only allow empty spots to be taken
-        if (b1.spots[inputPosition] == Empty)
+        if (b1.spots[inputPosition] == Empty && inputPosition < 9 && b1.result == Neutral)
         {
             selectSpot(&b1, inputPosition);
             b1.result = determineResult(&b1);
@@ -191,6 +199,8 @@ int main(int argc, char *argv[])
                 bot.gamesRecorded++;
                 printf("%d\n", bot.gamesRecorded);
                 recordBot(&bot);
+            } else {
+                printBoard(&b1);
             }
 
             printResult(&b1);
@@ -198,7 +208,11 @@ int main(int argc, char *argv[])
         else
         {
             printBoard(&b1);
-            printf("That spot is taken\n");
+            if (b1.result == Neutral){
+                printf("That spot is taken\n");
+            } else {
+                printf("The game is over\n");
+            }
         }
     }
     else
