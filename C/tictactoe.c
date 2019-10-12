@@ -55,7 +55,7 @@ enum Piece
 
 typedef struct Board
 {
-    int size, length;
+    int size, length, weight;
     char spots[9];
     enum Result result;
     enum Piece currentTurn;
@@ -67,9 +67,9 @@ typedef struct Bot
     Board history[100];
 } Bot;
 
-#define DEFAULT_BOARD                  \
-    {                                  \
-        3, 9, "_________", Neutral, P1 \
+#define DEFAULT_BOARD                     \
+    {                                     \
+        3, 9, 0, "_________", Neutral, P1 \
     }
 
 #define DEFAULT_BOT        \
@@ -94,9 +94,31 @@ void recordBot(Bot *b);
 void loadBot(Bot *b);
 void addBoard(Bot *bot, Board *b);
 void printResult(Board *b);
+int boardContains(Board *b1, Board *b2);
+int isNextInRoute(Board *b1, Board *b2);
+void printWeight(Board *b);
+void test();
+
+void test()
+{
+    Bot bot = DEFAULT_BOT;
+    loadBot(&bot);
+    for (int i = 0; i < bot.gamesRecorded; i++)
+    {
+        printf("Weight: ");
+        printWeight(&bot.history[i]);
+        printBoard(&bot.history[i]);
+        printResult(&bot.history[i]);
+    }
+}
 
 int main(int argc, char *argv[])
 {
+    if (argc > 1 && !strcmp(argv[1], "-t"))
+    {
+        test();
+        return 0;
+    }
     int inputPosition = -1;
     // Initialize board
     Board b1 = DEFAULT_BOARD;
@@ -120,6 +142,11 @@ int main(int argc, char *argv[])
         {
             selectSpot(&b1, inputPosition);
             b1.result = determineResult(&b1);
+            if (b1.result == Lose)
+                b1.weight = -1;
+            if (b1.result == Win)
+                b1.weight = 1;
+
             recordBoard(&b1);
 
             // Determine if the board should be saved
@@ -137,6 +164,7 @@ int main(int argc, char *argv[])
             if (copyOver)
             {
                 printf("Copying the board\n");
+                // Copy the board into the history
                 bot.history[bot.gamesRecorded].currentTurn = b1.currentTurn;
                 bot.history[bot.gamesRecorded].length = b1.length;
                 bot.history[bot.gamesRecorded].size = b1.size;
@@ -144,8 +172,21 @@ int main(int argc, char *argv[])
                     bot.history[bot.gamesRecorded].spots[j] = b1.spots[j];
 
                 bot.history[bot.gamesRecorded].result = b1.result;
+                bot.history[bot.gamesRecorded].weight = b1.weight;
 
                 printBoard(&bot.history[bot.gamesRecorded]);
+
+                /** For all boards in bot history
+                 * check if it is a subboard
+                 *  if it is add the weight
+                 * */
+                for (int index = 0; index < bot.gamesRecorded; index++)
+                {
+                    if (boardContains(&bot.history[bot.gamesRecorded], &bot.history[index]))
+                    {
+                        bot.history[index].weight += bot.history[bot.gamesRecorded].weight;
+                    }
+                }
 
                 bot.gamesRecorded++;
                 printf("%d\n", bot.gamesRecorded);
@@ -313,9 +354,16 @@ void printResult(Board *b)
     else if (b->result == Tie)
     {
         printf("You Tied!!\n");
-    } else if (b->result == Neutral) {
+    }
+    else if (b->result == Neutral)
+    {
         printf("Neutral\n");
     }
+}
+
+void printWeight(Board *b)
+{
+    printf("%d\n", b->weight);
 }
 
 /**
@@ -404,6 +452,50 @@ int boardsAreIdentical(Board *b1, Board *b2)
             return 0;
         }
     }
+    return 1;
+}
+
+/**
+ * Checks to see if b1 contains b2
+ * 
+ * returns 1 if b2 is a sub-board of b1
+ * returns 0 otherwise
+ * 
+ * Note: b2 is a sub-board of b1 if it is 
+ * possible during gameplay to go from b2 to b1
+ **/
+int boardContains(Board *b1, Board *b2)
+{
+    for (int i = 0; i < b1->length; i++)
+    {
+        if (b2->spots[i] != Empty && b2->spots[i] != b1->spots[i])
+            return 0;
+    }
+    return 1;
+}
+
+/**
+ * Determines if b2 is one move after b1
+ * 
+ * Returns 1 if b2 is achievable in one move from b1
+ * Returns 0 otherwise 
+ **/
+int isNextInRoute(Board *b1, Board *b2)
+{
+    int numDiff = 0;
+    for (int i = 0; i < b1->length; i++)
+    {
+        if (b2->spots[i] != Empty && b2->spots[i] != b1->spots[i])
+        {
+            numDiff++;
+            if (numDiff > 1)
+            {
+                return 0;
+            }
+        }
+    }
+    if (numDiff == 0)
+        return 0;
     return 1;
 }
 

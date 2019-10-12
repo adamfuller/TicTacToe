@@ -13,12 +13,12 @@
 - - - [x] Check if two boards are identical
 - - [ ] Avoid past mistakes
 - - - [ ] Determine winning routes from current board
-- - - - [ ] Check if board contains a sub-board
+- - - - [x] Check if board contains a sub-board
 - - - [ ] Determine losing routes from current board
 - - [ ] Pick optimal spot
 - - - [ ] Remove all definite losing route options
 - - - [ ] Priotize route with highest chance of winning
-- - - - [ ] Assign weights to routes
+- - - - [x] Assign weights to routes
 - - - [ ] Pick random spot with highest weight
 
 ### Structs
