@@ -64,7 +64,7 @@ typedef struct Board
 typedef struct Bot
 {
     int gamesRecorded;
-    Board history[100];
+    Board history[20000]; // 19683 possible board permutations
 } Bot;
 
 #define DEFAULT_BOARD                     \
@@ -97,18 +97,24 @@ void printResult(Board *b);
 int boardContains(Board *b1, Board *b2);
 int isNextInRoute(Board *b1, Board *b2);
 void printWeight(Board *b);
+int playARound(Board *b, Bot *bot, int position);
+void reorder(char arr[], int index[], int n) ;
 void test();
 
 void test()
 {
+    Board b1 = DEFAULT_BOARD;
     Bot bot = DEFAULT_BOT;
+    // Load board from data
+    loadBoard(&b1);
     loadBot(&bot);
-    for (int i = 0; i < bot.gamesRecorded; i++)
+    int randSpot;
+    for (int i = 0; i < 100000; i++)
     {
-        printf("Weight: ");
-        printWeight(&bot.history[i]);
-        printBoard(&bot.history[i]);
-        printResult(&bot.history[i]);
+        
+        while(!playARound(&b1, &bot, randSpot)){
+            randSpot = getRandomSpot(&b1);
+        }
     }
 }
 
@@ -139,92 +145,125 @@ int main(int argc, char *argv[])
     // Use the bot if arg 1 or 2 is -c
     if (argc > 2 && (!strcmp(argv[2], "-c") || !strcmp(argv[1], "-c")))
         useBot = 1;
+    if (argc > 1 && !strcmp(argv[1], "-i")){
+        printf("%d boards recorded\n", bot.gamesRecorded);
+        return 0;
+    }
 
     // printBoard(&bot.history[bot.gamesRecorded-1]);
 
     if (argc > 1)
     {
         inputPosition = atoi(argv[1]);
-        // Only allow empty spots to be taken
-        if (b1.spots[inputPosition] == Empty && inputPosition < 9 && b1.result == Neutral)
-        {
-            selectSpot(&b1, inputPosition);
-            b1.result = determineResult(&b1);
-            if (b1.result == Lose)
-                b1.weight = -1;
-            if (b1.result == Win)
-                b1.weight = 1;
-
-            recordBoard(&b1);
-
-            // Determine if the board should be saved
-            int copyOver = 1;
-            for (int i = 0; i < bot.gamesRecorded; i++)
-            {
-                if (boardsAreSimilar(&bot.history[i], &b1))
-                {
-                    copyOver = 0;
-                    break;
-                }
-            }
-
-            // Add the board to the bot's history
-            if (copyOver)
-            {
-                printf("Copying the board\n");
-                // Copy the board into the history
-                bot.history[bot.gamesRecorded].currentTurn = b1.currentTurn;
-                bot.history[bot.gamesRecorded].length = b1.length;
-                bot.history[bot.gamesRecorded].size = b1.size;
-                for (int j = 0; j < 9; j++)
-                    bot.history[bot.gamesRecorded].spots[j] = b1.spots[j];
-
-                bot.history[bot.gamesRecorded].result = b1.result;
-                bot.history[bot.gamesRecorded].weight = b1.weight;
-
-                printBoard(&bot.history[bot.gamesRecorded]);
-
-                /** For all boards in bot history
-                 * check if it is a subboard
-                 *  if it is add the weight
-                 * */
-                for (int index = 0; index < bot.gamesRecorded; index++)
-                {
-                    if (boardContains(&bot.history[bot.gamesRecorded], &bot.history[index]))
-                    {
-                        bot.history[index].weight += bot.history[bot.gamesRecorded].weight;
-                    }
-                }
-
-                bot.gamesRecorded++;
-                printf("%d\n", bot.gamesRecorded);
-                recordBot(&bot);
-            } else {
-                printBoard(&b1);
-            }
-
-            printResult(&b1);
-        }
-        else
-        {
-            printBoard(&b1);
-            if (b1.result == Neutral){
-                printf("That spot is taken\n");
-            } else {
-                printf("The game is over\n");
-            }
-        }
+        playARound(&b1, &bot, inputPosition);
     }
     else
     {
+        // Output all recorded boards
         for (int i = 0; i < bot.gamesRecorded; i++)
         {
             printBoard(&bot.history[i]);
             printResult(&bot.history[i]);
+            printf("Weight: ");
+            printWeight(&bot.history[i]);
         }
     }
 
     return 0;
+}
+
+/**
+ * Plays a round, current player puts a piece
+ * in selected position
+ * Returns 0 when a game is completed 
+ **/
+int playARound(Board *b, Bot *bot, int position)
+{
+    int returnVal = 0;
+    if (b->result != Neutral)
+    {
+        printf("Starting new game\n");
+        Board b2 = DEFAULT_BOARD;
+        recordBoard(&b2);
+        loadBoard(b);
+    }
+    // Only allow empty spots to be taken
+    if (b->spots[position] == Empty && position < 9 && b->result == Neutral)
+    {
+        selectSpot(b, position);
+        b->result = determineResult(b);
+        if (b->result != Neutral)
+            returnVal = 1;
+        if (b->result == Lose)
+            b->weight = -1;
+        if (b->result == Win)
+            b->weight = 1;
+
+        recordBoard(b);
+
+        // Determine if the board should be saved
+        int copyOver = 1;
+        for (int i = 0; i < bot->gamesRecorded; i++)
+        {
+            if (boardsAreSimilar(&bot->history[i], b))
+            {
+                copyOver = 0;
+                break;
+            }
+        }
+
+        // Add the board to the bot's history
+        if (copyOver)
+        {
+            printf("Copying the board\n");
+            // Copy the board into the history
+            bot->history[bot->gamesRecorded].currentTurn = b->currentTurn;
+            bot->history[bot->gamesRecorded].length = b->length;
+            bot->history[bot->gamesRecorded].size = b->size;
+            for (int j = 0; j < 9; j++)
+                bot->history[bot->gamesRecorded].spots[j] = b->spots[j];
+
+            bot->history[bot->gamesRecorded].result = b->result;
+            bot->history[bot->gamesRecorded].weight = b->weight;
+
+            printBoard(&bot->history[bot->gamesRecorded]);
+
+            /** For all boards in bot history
+                 * check if it is a subboard
+                 *  if it is add the weight
+                 * */
+            for (int index = 0; index < bot->gamesRecorded; index++)
+            {
+                if (boardContains(&bot->history[bot->gamesRecorded], &bot->history[index]))
+                {
+                    bot->history[index].weight += bot->history[bot->gamesRecorded].weight;
+                }
+            }
+
+            bot->gamesRecorded++;
+            printf("%d\n", bot->gamesRecorded);
+            recordBot(bot);
+        }
+        else
+        {
+            printBoard(b);
+        }
+
+        printResult(b);
+    }
+    else
+    {
+        printBoard(b);
+        if (b->result == Neutral)
+        {
+            printf("That spot is taken\n");
+        }
+        else
+        {
+            printf("The game is over\n");
+        }
+    }
+    return returnVal;
 }
 
 /**
@@ -321,7 +360,6 @@ void loadBot(Bot *b)
 {
     int numBoards;
     FILE *botFile = fopen(BOT_FILE, "rb");
-    // Board *board = (Board *) malloc(sizeof(board));
     if (botFile == NULL)
     {
         // return 0;
@@ -400,6 +438,11 @@ int getRandomSpot(Board *b)
             index++;
         }
     }
+
+    // Note: DO NOT REMOVE!
+    // Handles following error:
+    // Floating point exception: 8
+    if (index == 0) return -1;
 
     int val = rand() % index;
 
@@ -533,6 +576,8 @@ void rotateLeft(Board *b)
     {
         b->spots[i] = newSpots[i];
     }
+    // Don't forget to free up memory...
+    free(newSpots);
 }
 
 /**
@@ -555,4 +600,6 @@ void rotateRight(Board *b)
     {
         b->spots[i] = newSpots[i];
     }
+    // Don't forget to free up memory...
+    free(newSpots);
 }
