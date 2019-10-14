@@ -108,26 +108,26 @@ void test()
     Board b1 = DEFAULT_BOARD;
     Board b2 = DEFAULT_BOARD;
     Bot bot = DEFAULT_BOT;
-    loadBot(&bot);
+    // loadBot(&bot);
 
-    selectSpot(&b2, 2);
+    // selectSpot(&b2, 2);
 
-    printf("Board contains: %d\n", boardContains(&b1, &b2));
-    printf("isNextInRoute: %d\n", isNextInRoute(&b1, &b2));
-    printf("Next move: %d\n", getNextMove(&b1, &b2));
-    printf("Best Next move: %d\n", getBestNextMove(&bot, &b2));
+    // printf("Board contains: %d\n", boardContains(&b1, &b2));
+    // printf("isNextInRoute: %d\n", isNextInRoute(&b1, &b2));
+    // printf("Next move: %d\n", getNextMove(&b1, &b2));
+    // printf("Best Next move: %d\n", getBestNextMove(&bot, &b2));
 
     // Load board from data
-    // loadBoard(&b1);
-    // loadBot(&bot);
-    // int randSpot;
-    // for (int i = 0; i < 100000; i++)
-    // {
-    //     while (!playARound(&b1, &bot, randSpot))
-    //     {
-    //         randSpot = getRandomSpot(&b1);
-    //     }
-    // }
+    loadBoard(&b1);
+    loadBot(&bot);
+    int randSpot;
+    for (int i = 0; i < 100000; i++)
+    {
+        while (!playARound(&b1, &bot, randSpot))
+        {
+            randSpot = getRandomSpot(&b1);
+        }
+    }
 }
 
 int main(int argc, char *argv[])
@@ -155,10 +155,14 @@ int main(int argc, char *argv[])
     // Use the bot if arg 1 or 2 is -c
     if (argc > 1 && (!strcmp(argv[1], "-c") || (argc > 2 && !strcmp(argv[2], "-c"))))
     {
+        // User input a position
         if (argc > 2)
         {
             inputPosition = atoi(argv[1]);
-            playARound(&b1, &bot, inputPosition);
+            if (playARound(&b1, &bot, inputPosition) == -1)
+            {
+                return 0;
+            }
             if (b1.result == Lose)
             {
                 printf("You lost!\n");
@@ -176,6 +180,7 @@ int main(int argc, char *argv[])
             }
             printf("Computer chose:\n");
         }
+
         int nextMove = getBestNextMove(&bot, &b1);
         if (nextMove == -1)
         {
@@ -329,6 +334,7 @@ int playARound(Board *b, Bot *bot, int position)
         {
             // Uncomment later
             printf("That spot is taken\n");
+            returnVal = -1;
             printBoard(b);
         }
         else
@@ -662,7 +668,7 @@ int isNextInRoute(Board *b1, Board *b2)
         for (int i = 0; i < b1->length; i++)
         {
             // Make sure the spot is not empty in b2.
-            if (b2->spots[i] != Empty && b2->spots[i] != b1->spots[i])
+            if (b2->spots[i] != Empty && b2->spots[i] != b1->spots[i] && b2->spots[i] == b1->currentTurn)
             {
                 numDiff++;
                 if (numDiff > 1)
@@ -725,7 +731,7 @@ int getBestNextMove(Bot *bot, Board *b)
     {
         if (!isNextInRoute(b, &bot->history[i]))
             continue;
-        if (bot->history[i].weight < bestWeight || bestNextMove == -1)
+        if (((b->currentTurn == P2 && bot->history[i].weight < bestWeight) || (b->currentTurn == P1 && bot->history[i].weight > bestWeight)) || bestNextMove == -1)
         {
             bestWeight = bot->history[i].weight;
             bestNextMove = getNextMove(b, &bot->history[i]);
