@@ -49,7 +49,7 @@ enum Result
 enum Piece
 {
     P1 = 'X',
-    P2 = 'O',
+    P2 = 'O', // CPU should be P2
     Empty = '_',
 };
 
@@ -98,24 +98,36 @@ int boardContains(Board *b1, Board *b2);
 int isNextInRoute(Board *b1, Board *b2);
 void printWeight(Board *b);
 int playARound(Board *b, Bot *bot, int position);
-void reorder(char arr[], int index[], int n) ;
+void reorder(char arr[], int index[], int n);
+int getNextMove(Board *b1, Board *b2);
+int getBestNextMove(Bot *bot, Board *b);
 void test();
 
 void test()
 {
     Board b1 = DEFAULT_BOARD;
+    Board b2 = DEFAULT_BOARD;
     Bot bot = DEFAULT_BOT;
-    // Load board from data
-    loadBoard(&b1);
     loadBot(&bot);
-    int randSpot;
-    for (int i = 0; i < 100000; i++)
-    {
-        
-        while(!playARound(&b1, &bot, randSpot)){
-            randSpot = getRandomSpot(&b1);
-        }
-    }
+
+    selectSpot(&b2, 2);
+
+    printf("Board contains: %d\n", boardContains(&b1, &b2));
+    printf("isNextInRoute: %d\n", isNextInRoute(&b1, &b2));
+    printf("Next move: %d\n", getNextMove(&b1, &b2));
+    printf("Best Next move: %d\n", getBestNextMove(&bot, &b2));
+
+    // Load board from data
+    // loadBoard(&b1);
+    // loadBot(&bot);
+    // int randSpot;
+    // for (int i = 0; i < 100000; i++)
+    // {
+    //     while (!playARound(&b1, &bot, randSpot))
+    //     {
+    //         randSpot = getRandomSpot(&b1);
+    //     }
+    // }
 }
 
 int main(int argc, char *argv[])
@@ -140,12 +152,54 @@ int main(int argc, char *argv[])
     loadBoard(&b1);
     loadBot(&bot);
 
-    // printBoard(&b1);
-    int useBot = 0;
     // Use the bot if arg 1 or 2 is -c
-    if (argc > 2 && (!strcmp(argv[2], "-c") || !strcmp(argv[1], "-c")))
-        useBot = 1;
-    if (argc > 1 && !strcmp(argv[1], "-i")){
+    if (argc > 1 && (!strcmp(argv[1], "-c") || (argc > 2 && !strcmp(argv[2], "-c"))))
+    {
+        if (argc > 2)
+        {
+            inputPosition = atoi(argv[1]);
+            playARound(&b1, &bot, inputPosition);
+            if (b1.result == Lose)
+            {
+                printf("You lost!\n");
+                return 0;
+            }
+            if (b1.result == Win)
+            {
+                printf("You won!\n");
+                return 0;
+            }
+            if (b1.result == Tie)
+            {
+                printf("It's a tie!\n");
+                return 0;
+            }
+            printf("Computer chose:\n");
+        }
+        int nextMove = getBestNextMove(&bot, &b1);
+        if (nextMove == -1)
+        {
+            nextMove = getRandomSpot(&b1);
+        }
+        playARound(&b1, &bot, nextMove);
+        if (b1.result == Lose)
+        {
+            printf("You lost!\n");
+        }
+        if (b1.result == Win)
+        {
+            printf("You won!\n");
+        }
+        if (b1.result == Tie)
+        {
+            printf("It's a tie!\n");
+        }
+        return 0;
+    }
+
+    // Prints the number of boards contained in the bot
+    if (argc > 1 && !strcmp(argv[1], "-i"))
+    {
         printf("%d boards recorded\n", bot.gamesRecorded);
         return 0;
     }
@@ -156,6 +210,12 @@ int main(int argc, char *argv[])
     {
         inputPosition = atoi(argv[1]);
         playARound(&b1, &bot, inputPosition);
+        if (b1.result == Lose)
+            printf("You lost!\n");
+        if (b1.result == Win)
+            printf("You won!\n");
+        if (b1.result == Tie)
+            printf("It's a tie!\n");
     }
     else
     {
@@ -180,13 +240,19 @@ int main(int argc, char *argv[])
 int playARound(Board *b, Bot *bot, int position)
 {
     int returnVal = 0;
+
+    // If the board is already completed start a new one
     if (b->result != Neutral)
     {
-        printf("Starting new game\n");
+        // TODO: Uncomment later
+        // printf("Starting new game\n");
         Board b2 = DEFAULT_BOARD;
+        // Uncomment later
         recordBoard(&b2);
+        // Uncomment later
         loadBoard(b);
     }
+
     // Only allow empty spots to be taken
     if (b->spots[position] == Empty && position < 9 && b->result == Neutral)
     {
@@ -199,6 +265,7 @@ int playARound(Board *b, Bot *bot, int position)
         if (b->result == Win)
             b->weight = 1;
 
+        // Uncomment later
         recordBoard(b);
 
         // Determine if the board should be saved
@@ -226,7 +293,8 @@ int playARound(Board *b, Bot *bot, int position)
             bot->history[bot->gamesRecorded].result = b->result;
             bot->history[bot->gamesRecorded].weight = b->weight;
 
-            printBoard(&bot->history[bot->gamesRecorded]);
+            // We will always print at the end, uncomment for testing
+            // printBoard(&bot->history[bot->gamesRecorded]);
 
             /** For all boards in bot history
                  * check if it is a subboard
@@ -234,35 +302,43 @@ int playARound(Board *b, Bot *bot, int position)
                  * */
             for (int index = 0; index < bot->gamesRecorded; index++)
             {
-                if (boardContains(&bot->history[bot->gamesRecorded], &bot->history[index]))
+                if (boardContains(b, &bot->history[index]))
                 {
                     bot->history[index].weight += bot->history[bot->gamesRecorded].weight;
                 }
             }
 
             bot->gamesRecorded++;
-            printf("%d\n", bot->gamesRecorded);
+            // Uncomment later
+            printf("Boards recorded: %d\n", bot->gamesRecorded);
             recordBot(bot);
         }
         else
         {
-            printBoard(b);
+            // Uncomment later
+            // printBoard(b);
         }
-
-        printResult(b);
+        // Uncomment later
+        // printResult(b);
     }
     else
     {
-        printBoard(b);
+        // Uncomment later
+        // printBoard(b);
         if (b->result == Neutral)
         {
+            // Uncomment later
             printf("That spot is taken\n");
+            printBoard(b);
         }
         else
         {
-            printf("The game is over\n");
+            // Uncomment later
+            // printf("The game is over\n");
         }
     }
+
+    printBoard(b);
     return returnVal;
 }
 
@@ -442,7 +518,8 @@ int getRandomSpot(Board *b)
     // Note: DO NOT REMOVE!
     // Handles following error:
     // Floating point exception: 8
-    if (index == 0) return -1;
+    if (index == 0)
+        return -1;
 
     int val = rand() % index;
 
@@ -520,8 +597,41 @@ int boardsAreIdentical(Board *b1, Board *b2)
  * 
  * Note: b2 is a sub-board of b1 if it is 
  * possible during gameplay to go from b2 to b1
+ * for any orientation of b2.
  **/
 int boardContains(Board *b1, Board *b2)
+{
+    int output = 0;
+
+    // Rotate 4 times to negate changes.
+    for (int index = 0; index < 4; index++)
+    {
+        rotateRight(b1);
+        // If output is already set just keep rotating
+        if (output)
+            continue;
+        for (int i = 0; i < b1->length; i++)
+        {
+            if (b2->spots[i] != Empty && b2->spots[i] != b1->spots[i])
+                break;
+            output = 1;
+        }
+    }
+
+    return output;
+}
+
+/**
+ * Checks to see if b1 contains b2
+ * 
+ * returns 1 if b2 is a sub-board of b1
+ * returns 0 otherwise
+ * 
+ * Note: b2 is a sub-board of b1 if it is 
+ * possible during gameplay to go from b2 to b1
+ * for the CURRENT orientations.
+ **/
+int boardContainsDirect(Board *b1, Board *b2)
 {
     for (int i = 0; i < b1->length; i++)
     {
@@ -540,20 +650,88 @@ int boardContains(Board *b1, Board *b2)
 int isNextInRoute(Board *b1, Board *b2)
 {
     int numDiff = 0;
-    for (int i = 0; i < b1->length; i++)
+    int output = 0;
+    // Rotate 4 times to negate changes.
+    for (int index = 0; index < 4; index++)
     {
-        if (b2->spots[i] != Empty && b2->spots[i] != b1->spots[i])
+        rotateRight(b1);
+        // Don't keep checking if it's already true.
+        if (output)
+            continue;
+
+        for (int i = 0; i < b1->length; i++)
         {
-            numDiff++;
-            if (numDiff > 1)
+            // Make sure the spot is not empty in b2.
+            if (b2->spots[i] != Empty && b2->spots[i] != b1->spots[i])
             {
-                return 0;
+                numDiff++;
+                if (numDiff > 1)
+                {
+                    numDiff = 0;
+                    break;
+                }
             }
         }
+        // If this orientation only has one difference it is the next in line
+        if (numDiff == 1)
+            output = 1;
     }
-    if (numDiff == 0)
-        return 0;
-    return 1;
+
+    return output;
+}
+
+/**
+ * Returns the index of the position to take to go from
+ * b1 to b2 if nextInRoute is true for b1 to b2.
+ * 
+ * returns -1 if going from b1 to b2 in one move isn't possible
+ * or if the move can not be determined
+ **/
+int getNextMove(Board *b1, Board *b2)
+{
+    if (!isNextInRoute(b1, b2))
+    {
+        return -1;
+    }
+    for (int index = 0; index < 4; index++)
+    {
+        if (!boardContainsDirect(b2, b1))
+        {
+            continue;
+        }
+        for (int i = 0; i < b1->length; i++)
+        {
+            if (b1->spots[i] != b2->spots[i])
+                return i;
+        }
+        rotateRight(b2);
+    }
+
+    return -1;
+}
+
+/**
+ * Returns the index of the best move know
+ * to the bot. 
+ * 
+ * If no move can be chosen a random one is used.
+ * If no move is available, -1 is returned.
+ **/
+int getBestNextMove(Bot *bot, Board *b)
+{
+    int bestWeight = 0;
+    int bestNextMove = getRandomSpot(b);
+    for (int i = 0; i < bot->gamesRecorded; i++)
+    {
+        if (!isNextInRoute(b, &bot->history[i]))
+            continue;
+        if (bot->history[i].weight < bestWeight || bestNextMove == -1)
+        {
+            bestWeight = bot->history[i].weight;
+            bestNextMove = getNextMove(b, &bot->history[i]);
+        }
+    }
+    return bestNextMove;
 }
 
 /**

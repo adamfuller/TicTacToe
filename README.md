@@ -19,7 +19,7 @@
 - - - [ ] Remove all definite losing route options
 - - - [ ] Priotize route with highest chance of winning
 - - - - [x] Assign weights to routes
-- - - [ ] Pick random spot with highest weight
+- - - [x] Pick spot with best weight
 
 ### Structs
 1. Bot
