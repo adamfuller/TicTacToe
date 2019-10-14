@@ -684,7 +684,7 @@ if __name__ == '__main__':
     #set to 'not' to play against AI set to 'random' to have random opponent
     rando = "not"
     #set to 'player' to play against it set to 'computer' to play itself
-    play = 'computer'
+    play = 'player'
     #time between turns
     delay = 0
     while True:
