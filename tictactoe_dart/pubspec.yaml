@@ -1,0 +1,31 @@
+name: tictactoe
+description: A new Flutter project.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.1.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^0.1.2
+
+  custom_widget:
+    git:
+      url: git://github.com/adamfuller/custom_widget.git
+      ref: 0.1.0
+  neural_network:
+    git:
+      url: git://github.com/adamfuller/neural_network.git
+      ref: 0.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+  
+
+flutter:
+  uses-material-design: true
